@@ -1,0 +1,8 @@
+state.json
+*.deb
+client/
+cache/
+logs/
+node_modules/
+*.log
+.env
