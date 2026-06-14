@@ -1,6 +1,6 @@
 # yidongyun
 
-移动云电脑协议级保活工具。它复用官方 Linux 客户端里的中兴云电脑 SDK，在无图形界面的服务器上以 `offscreen` 模式完成连接和 Display Surface 创建，用 systemd timer 每 10 分钟保活一次。
+移动云电脑 Linux 辅助连接工具。它在服务器环境中调用官方 Linux 客户端组件完成定时连接检查，并通过 systemd timer 周期运行。
 
 本仓库不包含官方客户端安装包、解包后的 SDK、登录 token 或手机号。安装脚本会从移动云电脑官方地址下载客户端包并在本机解包。
 
@@ -34,7 +34,7 @@ sudo yidongyun list
 0: userServiceId=1234567 vmName=青藤 spuCode=zte-cloud-pc
 ```
 
-把实际的 `userServiceId` 写入 systemd 定时器：
+把实际的 `userServiceId` 写入 systemd 定时器配置：
 
 ```bash
 sudo bash scripts/install-systemd.sh <userServiceId>
@@ -42,7 +42,7 @@ sudo bash scripts/install-systemd.sh <userServiceId>
 
 ## 常用命令
 
-手动保活 120 秒：
+手动运行一次连接检查：
 
 ```bash
 sudo yidongyun keepalive --user-service-id <userServiceId> --duration 120
@@ -84,7 +84,7 @@ sudo yidongyun sms-login <手机号> <短信验证码>
 sudo bash scripts/install.sh
 ```
 
-如果接口返回登录失效，重新执行短信登录。若保活没有按时运行，先看 timer 和 service 日志：
+如果接口返回登录失效，重新执行短信登录。若定时任务没有按时运行，先看 timer 和 service 日志：
 
 ```bash
 systemctl status yidongyun-keepalive.timer --no-pager
