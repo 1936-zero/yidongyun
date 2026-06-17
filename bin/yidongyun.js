@@ -302,7 +302,7 @@ async function keepalive(opts) {
   const duration = Number(opts.duration || 120);
   console.log(`connected command sent; holding ${duration}s`);
   await wait(duration * 1000);
-  client.write(JSON.stringify({ command: 'disconnect', vmID: auth.vmId, vmUserName: '1', vmPassword: '2', vmcIP: '3', vmcPort: 4, cagIP: '5', cagPort: 6 }));
+  client.write(JSON.stringify({ ...msg, command: 'disconnect' }));
   await wait(3000);
   client.write(JSON.stringify({ command: 'exit' }));
   client.end();

@@ -35,6 +35,7 @@ install_pkg_any "Qt XML" libqt5xml5t64 libqt5xml5
 install_pkg_any "Qt PrintSupport" libqt5printsupport5t64 libqt5printsupport5
 install_pkg_any "Qt Concurrent" libqt5concurrent5t64 libqt5concurrent5
 install_pkg_any "JPEG runtime" libjpeg62 libjpeg62-turbo
+install_pkg_any "PulseAudio GLib runtime" libpulse-mainloop-glib0
 
 NODE_MAJOR="$(node -p "Number(process.versions.node.split('.')[0])" 2>/dev/null || echo 0)"
 if [[ "$NODE_MAJOR" -lt 18 ]]; then
