@@ -12,6 +12,27 @@
 - systemd
 - 能访问 `https://soho.komect.com`
 
+### 飞牛 NAS / Debian 系统
+
+飞牛 NAS 上建议先确认环境：
+
+```bash
+uname -m
+cat /etc/os-release
+command -v apt
+command -v systemctl
+node -v
+```
+
+推荐条件：
+
+- `uname -m` 为 `x86_64`
+- 系统可使用 `apt`
+- Node.js 为 18 或更新版本
+- 可使用 `systemctl`
+
+如果是 ARM 架构，官方 Linux 客户端包不可用，本工具无法直接部署。若系统自带 Node.js 低于 18，请先升级 Node.js 后再运行安装脚本。
+
 ## 部署
 
 ```bash
