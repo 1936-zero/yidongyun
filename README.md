@@ -24,6 +24,8 @@
 - 使用 cron 调度
 - 日志写入 `/var/log/yidongyun/keepalive-legacy.log`
 
+详细原理和完整步骤见：[Ubuntu VM legacy keepalive](docs/ubuntu-vm-legacy-keepalive.md)。
+
 部署前建议确认：
 
 ```bash

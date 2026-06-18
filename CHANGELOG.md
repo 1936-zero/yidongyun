@@ -15,6 +15,7 @@
   - 安装 `/etc/cron.d/yidongyun-keepalive-legacy`
   - 每 10 分钟运行一次，每次保持 120 秒
 - README 增加 Ubuntu VM legacy 推荐部署流程和重装恢复说明。
+- 新增 `docs/ubuntu-vm-legacy-keepalive.md`，说明原理、部署步骤、验证方法、重装恢复和回滚方式。
 
 #### 调整
 
