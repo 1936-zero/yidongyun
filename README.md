@@ -171,6 +171,51 @@ sudo bash scripts/enable-ubuntu-vm-legacy.sh <userServiceId>
 sudo /usr/local/bin/yidongyun-keepalive-legacy.sh
 ```
 
+## Docker Web UI 部署
+
+Docker 模式提供一个 Web 控制台，后端复用 CLI 的 `lib/core.js` 逻辑，不单独实现登录、列表或保活协议。
+
+建议先按 Ubuntu VM legacy 流程完成一次安装和短信登录，确认 `/etc/yidongyun/state.json` 已存在。Docker Web UI 默认复用这份登录态和同一份 legacy 日志，避免容器生成不同 deviceId 后和已验证的 Ubuntu VM 行为不一致。
+
+```bash
+git clone git@github.com:gjz518/yidongyun.git
+cd yidongyun
+YDY_WEB_PORT=18081 docker compose up -d --build
+```
+
+打开：
+
+```text
+http://localhost:18081
+```
+
+Web UI 支持：
+
+- 发送短信验证码
+- 短信登录
+- 读取云电脑列表
+- 手动运行一次 keepalive
+- 开始/停止持续保活调度
+- 查看 Web 日志和 legacy 日志
+
+容器挂载：
+
+```text
+/etc/yidongyun -> /data
+/var/log/yidongyun -> /var/log/yidongyun
+```
+
+登录状态来自主机 `/etc/yidongyun/state.json`，不要公开这个目录。Docker 模式默认设置：
+
+```text
+network_mode=host
+uts=host
+PORT=${YDY_WEB_PORT:-18081}
+YDY_HOME=/data
+YDY_LEGACY_DISCONNECT=1
+QT_QPA_PLATFORM=offscreen
+```
+
 如果有本地安全备份，也可以恢复：
 
 ```text

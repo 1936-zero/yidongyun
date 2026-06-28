@@ -1,0 +1,20 @@
+services:
+  yidongyun:
+    build: .
+    container_name: yidongyun
+    restart: unless-stopped
+    network_mode: host
+    uts: host
+    environment:
+      PORT: "${YDY_WEB_PORT:-18081}"
+      TZ: Asia/Shanghai
+      YDY_TIME_ZONE: Asia/Shanghai
+      YDY_HOME: /data
+      YDY_CLIENT_ROOT: /opt/yidongyun/client/opt/chuanyun-vdi-client
+      YDY_LEGACY_DISCONNECT: "1"
+      QT_QPA_PLATFORM: offscreen
+    volumes:
+      - /etc/yidongyun:/data
+      - /var/log/yidongyun:/var/log/yidongyun
+    privileged: true
+    shm_size: "512m"
