@@ -8,6 +8,8 @@ const {
   createSuccessSummary,
   applyRunSuccess,
   applyRunFailure,
+  createDefaultCloudCache,
+  applyCloudListCache,
   mergeSchedulerPatch,
   resolveStartupDelay,
   resolveFollowupDelay,
@@ -29,6 +31,17 @@ assert.strictEqual(scheduler.duration, 120);
 assert.strictEqual(scheduler.successCount, 0);
 assert.strictEqual(scheduler.consecutiveFailures, 0);
 assert.strictEqual(scheduler.lastFailureReason, '');
+
+const cloudCache = createDefaultCloudCache();
+assert.deepStrictEqual(cloudCache.list, []);
+assert.strictEqual(cloudCache.updatedAt, null);
+
+const updatedCloudCache = applyCloudListCache(cloudCache, [
+  { userServiceId: '2663816', vmName: '家庭云电脑畅享版月包', spuCode: 'zte-cloud-pc' },
+], '2026-06-29T01:02:03.000Z');
+assert.strictEqual(updatedCloudCache.list.length, 1);
+assert.strictEqual(updatedCloudCache.list[0].userServiceId, '2663816');
+assert.strictEqual(updatedCloudCache.updatedAt, '2026-06-29T01:02:03.000Z');
 
 const patched = mergeSchedulerPatch(scheduler, {
   enabled: true,

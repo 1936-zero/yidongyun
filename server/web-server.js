@@ -47,6 +47,7 @@ const runState = {
 let schedulerTimer = null;
 let runAbortController = null;
 let scheduler = loadScheduler();
+let cloudCache = loadCloudCache();
 
 function nowIso() {
   return new Date().toISOString();
@@ -104,9 +105,17 @@ const coreLogger = {
   },
 };
 
+function loadWebConfig() {
+  try {
+    return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
 function loadScheduler() {
   try {
-    const loaded = { ...createDefaultScheduler(), ...JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8')) };
+    const loaded = { ...createDefaultScheduler(), ...loadWebConfig() };
     if (loaded.enabled && !loaded.startedAt) loaded.startedAt = nowIso();
     if (loaded.lastSuccessAt && loaded.lastVerdict === 'success') loaded.lastSummary = createSuccessSummary(loaded);
     return loaded;
@@ -137,9 +146,48 @@ function createDefaultScheduler() {
   };
 }
 
-function saveScheduler() {
+function createDefaultCloudCache() {
+  return {
+    list: [],
+    updatedAt: null,
+  };
+}
+
+function applyCloudListCache(current, list, updatedAt = nowIso()) {
+  return {
+    ...createDefaultCloudCache(),
+    ...current,
+    list: Array.isArray(list) ? list : [],
+    updatedAt,
+  };
+}
+
+function loadCloudCache() {
+  const loaded = loadWebConfig();
+  return applyCloudListCache(createDefaultCloudCache(), loaded.cloudCache?.list || [], loaded.cloudCache?.updatedAt || null);
+}
+
+function publicCloudCache() {
+  return {
+    list: Array.isArray(cloudCache.list) ? cloudCache.list : [],
+    updatedAt: cloudCache.updatedAt || null,
+  };
+}
+
+function saveWebConfig() {
   fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(publicScheduler(), null, 2) + '\n', { mode: 0o600 });
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify({
+    ...publicScheduler(),
+    cloudCache: publicCloudCache(),
+  }, null, 2) + '\n', { mode: 0o600 });
+}
+
+function saveScheduler() {
+  saveWebConfig();
+}
+
+function saveCloudCache() {
+  saveWebConfig();
 }
 
 function publicScheduler() {
@@ -501,6 +549,13 @@ function analyzeSuccessSignals(logText) {
   return { verdict, reason, checks, missing };
 }
 
+async function refreshCloudCache() {
+  const list = await listClouds({ logger: coreLogger, print: false });
+  cloudCache = applyCloudListCache(cloudCache, list);
+  saveCloudCache();
+  return publicCloudCache();
+}
+
 function contentType(file) {
   if (file.endsWith('.html')) return 'text/html; charset=utf-8';
   if (file.endsWith('.css')) return 'text/css; charset=utf-8';
@@ -532,8 +587,10 @@ async function handleApi(req, res, url) {
       });
     }
     if (req.method === 'GET' && url.pathname === '/api/clouds') {
-      const list = await listClouds({ logger: coreLogger, print: false });
-      return sendJson(res, 200, { ok: true, list });
+      const cache = url.searchParams.get('refresh') === '1'
+        ? await refreshCloudCache()
+        : publicCloudCache();
+      return sendJson(res, 200, { ok: true, ...cache, cached: url.searchParams.get('refresh') !== '1' });
     }
     if (req.method === 'POST' && url.pathname === '/api/sms-send') {
       const body = await readBody(req);
@@ -621,4 +678,7 @@ module.exports = {
   applyRunSuccess,
   applyRunFailure,
   isTransientFailure,
+  createDefaultCloudCache,
+  applyCloudListCache,
+  publicCloudCache,
 };

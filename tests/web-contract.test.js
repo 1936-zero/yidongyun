@@ -44,6 +44,8 @@ const ui = [
 ].join('\n');
 assert.match(ui, /\/api\/sms-send/, 'UI must call sms-send API');
 assert.match(ui, /\/api\/keepalive/, 'UI must call keepalive API');
+assert.match(ui, /loadCloudCache/, 'UI must load cached cloud list on page refresh');
+assert.match(ui, /\/api\/clouds\?refresh=1/, 'cloud list button must refresh and persist cloud cache');
 assert.match(ui, /\/api\/scheduler\/start/, 'UI must call persistent scheduler start API');
 assert.match(ui, /\/api\/scheduler\/stop/, 'UI must call persistent scheduler stop API');
 assert.match(ui, /signalVerdict/, 'UI must show an explicit success verdict');
@@ -60,6 +62,8 @@ assert.match(ui, /lastFailureReason/, 'UI must show latest failure reason');
 assert.match(ui, /上次临时失败/, 'UI must explain retrying scheduler state');
 assert.match(server, /connectDesktop ret val: 0/, 'server must parse source-aligned success signal');
 assert.match(server, /WEB_LOG_FILE/, 'server must persist Web logs to a file');
+assert.match(server, /cloudCache/, 'server must persist cloud list cache');
+assert.match(server, /refreshCloudCache/, 'server must explicitly refresh cloud cache');
 assert.match(server, /Asia\/Shanghai/, 'server must render logs and summaries in Shanghai time');
 
 const dockerfile = fs.readFileSync(dockerfilePath, 'utf8');

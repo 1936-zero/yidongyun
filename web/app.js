@@ -205,10 +205,15 @@ async function refreshLogs() {
   els.logOutput.textContent = `${web}\n\n----- legacy log -----\n${legacy}`;
 }
 
+async function loadCloudCache() {
+  const data = await api('/api/clouds');
+  renderClouds(data.list || []);
+}
+
 async function listClouds() {
   setBusy(els.listBtn, true);
   try {
-    const data = await api('/api/clouds');
+    const data = await api('/api/clouds?refresh=1');
     renderClouds(data.list || []);
     showToast('云电脑列表已更新');
   } finally {
@@ -312,7 +317,7 @@ async function guarded(fn) {
 }
 
 els.refreshBtn.addEventListener('click', () => guarded(async () => {
-  await Promise.all([refreshState(), refreshLogs()]);
+  await Promise.all([refreshState(), refreshLogs(), loadCloudCache()]);
 }));
 els.refreshLogsBtn.addEventListener('click', () => guarded(refreshLogs));
 els.listBtn.addEventListener('click', () => guarded(listClouds));
@@ -326,7 +331,7 @@ for (const input of schedulerInputs) {
 }
 
 guarded(async () => {
-  await Promise.all([refreshState({ forceFormSync: true }), refreshLogs()]);
+  await Promise.all([refreshState({ forceFormSync: true }), refreshLogs(), loadCloudCache()]);
 });
 
 setInterval(() => guarded(async () => {
